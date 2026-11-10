@@ -1,0 +1,345 @@
+[
+  {
+    "id": "bubble-58-57-eight",
+    "title": "8 人泡沫 · 58 人剩余 / 57 人获奖",
+    "config": {
+      "engine": "hrc_custom",
+      "players": [
+        {
+          "name": "UTG",
+          "stack": 19500.0,
+          "range": "all"
+        },
+        {
+          "name": "EP",
+          "stack": 89700.0,
+          "range": "all"
+        },
+        {
+          "name": "MP",
+          "stack": 39900.0,
+          "range": "all"
+        },
+        {
+          "name": "HJ",
+          "stack": 107400.0,
+          "range": "all"
+        },
+        {
+          "name": "CO",
+          "stack": 41700.0,
+          "range": "all"
+        },
+        {
+          "name": "BU",
+          "stack": 49500.0,
+          "range": "all"
+        },
+        {
+          "name": "SB",
+          "stack": 26400.0,
+          "range": "all"
+        },
+        {
+          "name": "BB",
+          "stack": 8700.0,
+          "range": "all"
+        }
+      ],
+      "small_blind": 1500.0,
+      "big_blind": 3000.0,
+      "ante": 375.0,
+      "ante_type": "REGULAR",
+      "straddle": "OFF",
+      "skip_small_blind": false,
+      "moving_button": false,
+      "tree_settings": {
+        "mode": "ui",
+        "preflop": {
+          "settings": {
+            "ALLOWED_FLATS_PER_RAISE": [
+              0,
+              2,
+              1,
+              0,
+              0
+            ],
+            "ALLOW_COLD_CALLS": true,
+            "ALLOW_FLATS_CLOSING_ACTION": true,
+            "ALLOW_SB_COMPLETE": true,
+            "PREFLOP_ADD_ALLIN_SPR": 5.0,
+            "PREFLOP_ALLIN_THRESHOLD": 70.0,
+            "SIZES_3BET_BB_VS_OTHER": "3.0x + 1.0x, all-in",
+            "SIZES_3BET_BB_VS_SB": "2.3x, all-in",
+            "SIZES_3BET_IP": "2.5x + 1.0x, all-in",
+            "SIZES_3BET_SB_VS_BB": "2.5x, all-in",
+            "SIZES_3BET_SB_VS_OTHER": "3.0x + 1.0x, all-in",
+            "SIZES_4BET_IP": "all-in",
+            "SIZES_4BET_OOP": "all-in",
+            "SIZES_5BET_IP": "all-in",
+            "SIZES_5BET_OOP": "all-in",
+            "SIZES_OPEN_BB": "3.0bb, all-in",
+            "SIZES_OPEN_BB_VS_SB": "3.0bb, all-in",
+            "SIZES_OPEN_BU": "2.0bb, all-in",
+            "SIZES_OPEN_OTHERS": "2.0bb, all-in",
+            "SIZES_OPEN_SB": "3.0bb, all-in"
+          },
+          "id": "preflop.settings.general"
+        },
+        "postflop": {
+          "settings": {
+            "POSTFLOP_ADD_ALLIN_SPR": [
+              5.0,
+              5.0
+            ],
+            "POSTFLOP_ADD_FLOP_BET_POT": [
+              [],
+              []
+            ],
+            "POSTFLOP_ADD_FLOP_CBET_POT": [
+              [],
+              []
+            ],
+            "POSTFLOP_ADD_FLOP_DONK_POT": [
+              [],
+              []
+            ],
+            "POSTFLOP_ADD_FLOP_RAISE_POT": [
+              [],
+              []
+            ],
+            "POSTFLOP_ALLOW_DONK": [
+              false,
+              false
+            ],
+            "POSTFLOP_ALLOW_DONK_PREV_AGGRESSION": [
+              true,
+              true
+            ],
+            "POSTFLOP_FORCE_CHECKDOWN_AFTER": [
+              3,
+              3,
+              2,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "POSTFLOP_GEO": [
+              [
+                66.0
+              ],
+              [
+                66.0
+              ]
+            ],
+            "POSTFLOP_MAX_BETS_PER_STREET": [
+              -1,
+              -1
+            ]
+          },
+          "id": "postflop.settings.simple"
+        }
+      },
+      "max_active": 4,
+      "node_budget": 250000,
+      "utility": "mtt_icm",
+      "payouts": [
+        2437.0,
+        1879.0,
+        1449.0,
+        1117.0,
+        861.0,
+        664.0,
+        512.0,
+        395.0,
+        304.0,
+        225.0,
+        192.0,
+        192.0,
+        163.0,
+        163.0,
+        163.0,
+        139.0,
+        139.0,
+        139.0,
+        139.0,
+        139.0,
+        118.0,
+        118.0,
+        118.0,
+        118.0,
+        118.0,
+        118.0,
+        118.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        86.0,
+        86.0,
+        86.0,
+        86.0,
+        86.0,
+        86.0,
+        86.0,
+        86.0,
+        86.0,
+        86.0,
+        86.0,
+        86.0,
+        86.0,
+        86.0,
+        86.0,
+        86.0,
+        86.0,
+        86.0
+      ],
+      "other_stacks": [
+        353635.7488812343,
+        263660.38899676054,
+        218107.08278586267,
+        188694.7604124066,
+        167447.8276456901,
+        151057.81083428572,
+        137854.57302736441,
+        126885.52897665076,
+        117559.6952629567,
+        109487.08267063792,
+        102397.85744106647,
+        96098.1784376755,
+        90444.4776683126,
+        85327.6917309874,
+        80663.17649546676,
+        76384.0239247879,
+        72436.49771195962,
+        68776.83382376138,
+        65368.94633037365,
+        62182.74915656864,
+        59192.90637283025,
+        56377.88662204691,
+        53719.23723000824,
+        51201.01950861161,
+        48809.36399443382,
+        46532.116026335134,
+        44358.55009061919,
+        42279.136966231505,
+        40285.351662831556,
+        38369.5129662903,
+        36524.64742068577,
+        34744.372000735864,
+        33022.79070335485,
+        31354.40090166837,
+        29734.005514376935,
+        28156.627190465162,
+        26617.41976724925,
+        25111.57173017457,
+        23634.193961655274,
+        22180.18077055187,
+        20744.026903884165,
+        19319.571928672296,
+        17899.62186281476,
+        16475.35471070723,
+        15035.32307267081,
+        13563.64558668665,
+        12036.386084919995,
+        10413.247289194362,
+        8614.122876498666,
+        6422.436067985522
+      ],
+      "bounty": {
+        "mode": "none",
+        "amounts": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "other_amounts": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "immediate_fraction": 1.0
+      },
+      "chip_scale": 100,
+      "iterations": 100000,
+      "seed": 43,
+      "stopping_mode": "samples",
+      "sampling_stage": "calculation",
+      "sampling_scope": "entire_tree",
+      "sampling_path": [],
+      "threads": 20,
+      "max_memory_bytes": 8589934592,
+      "solver_mode": "v4",
+      "track_ci": false,
+      "rake": {
+        "mode": "none",
+        "percentage": 5.0,
+        "cap": 3.0
+      }
+    },
+    "description": "SB 1500 / BB 3000 / Ante 375 · MTT ICM · 外桌 50 人 · 18–24BB 翻前规则"
+  }
+]

@@ -1,0 +1,14 @@
+/downloads/
+/tools/
+/external/
+/reports/
+/samples/
+/analysis/
+*.log
+__pycache__/
+/.venv/
+/.pytest_cache/
+/.runs/
+/.research-cache/
+*.hrcz
+/premium-audit.json

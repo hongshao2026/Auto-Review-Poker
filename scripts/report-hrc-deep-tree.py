@@ -1,0 +1,94 @@
+"""Publish the measured deep-tree audit, checking the executable/source hashes."""
+from __future__ import annotations
+import argparse
+import hashlib
+import json
+from pathlib import Path
+
+ROOT=Path(__file__).resolve().parents[1]
+
+
+def sha(path):
+    with path.open('rb') as stream:
+        return hashlib.file_digest(stream,'sha256').hexdigest()
+
+
+def main():
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--cache',type=Path,required=True)
+    args=parser.parse_args();cache=args.cache.resolve()
+    report=json.loads((cache/'benchmark/report.json').read_text())
+    assert len(report['trials'])==36 and len(report['checks'])==8
+    assert all(report['exact_mode_checkpoint_parity'].values())
+    assert report['baseline_instrumentation_checkpoint_parity']
+    for path,digest in report['source_sha256'].items():
+        assert sha(ROOT/path)==digest, path
+    for executable in report['executables'].values():
+        assert sha(Path(executable['path']))==executable['sha256']
+    report['validation']=json.loads((cache/'checks.json').read_text())
+    report['live_validation']=json.loads((cache/'live-validation.json').read_text())
+    profile=json.loads((cache/'profile/report.json').read_text())
+    assert profile['checkpoint_identical']
+    report['profile']=profile
+    for name in ('nine40bb_chip','nine40bb_large_chip'):
+        report['scenes'][name]['manifest']=json.loads((cache/name/'manifest.json').read_text())
+    report['scene_settings']={name:json.loads((cache/file).read_text()) for name,file in (
+        ('nine40bb_chip','settings.json'),('nine40bb_large_chip','large-settings.json'))}
+    rejected=json.loads((cache/'memo-pilot.json').read_text())
+    import statistics
+    report['rejected_strategy_cache']={'source':str(cache/'memo.cpp'),
+        'median_before_seconds':statistics.median(r['native_seconds'] for r in rejected if r['variant']=='current'),
+        'median_after_seconds':statistics.median(r['native_seconds'] for r in rejected if r['variant']=='memo'),
+        'production_enabled':False}
+    target=ROOT/'reports/hrc-deep-tree-optimization.json'
+    target.write_text(json.dumps(report,indent=2,ensure_ascii=False,allow_nan=False),encoding='utf-8')
+    names={'nine40bb_chip':'9 人 40BB，17,531 节点，100 万次',
+           'nine40bb_large_chip':'9 人 40BB，494,055 节点，10 万次',
+           'eight15bb_pko':'8 人 15BB PKO，100 万次'}
+    lines=['# 大树内核优化与验证','',
+        '2026-11-06。本轮保留原有行动树和抽象，不删除 3-bet/4-bet 尺寸。原生默认开启 ChipEV 固定收益分支跳过，其他模型自动禁用这项跳过。', '',
+        '## 本机计时','',
+        'i5-13600KF，约 32GB RAM。每个场景、线程数和版本交错运行三轮，下表为中位数。总样本按整个任务计数。训练计时排除启动加载和初始检查点，包含训练中及最终检查点。扣除检查点的时间仍包含轮询等训练开销。没有固定 CPU 亲和性、时钟或文件缓存状态。','',
+        '| 场景 | 线程 | 旧版含保存（秒） | 新版含保存（秒） | 含保存速度比 | 扣除保存速度比 |',
+        '|---|---:|---:|---:|---:|---:|']
+    for scene,result in report['results'].items():
+        for threads,data in result.items():
+            lines.append(f"| {names[scene]} | {threads} | {data['baseline']['median_native_seconds']:.3f} | {data['optimized']['median_native_seconds']:.3f} | {data['speedup']:.2f}× | {data['compute_speedup']:.2f}× |")
+    big=report['results']['nine40bb_large_chip']['1']
+    lines+=['',
+        f"大树单线程扣除保存为 {big['baseline']['median_training_without_checkpoint_seconds']:.3f} → {big['optimized']['median_training_without_checkpoint_seconds']:.3f} 秒。约 2.3GiB 的完整检查点仍主导 10 万次短测；不能把计算速度比当成启动至完成的总速度比，也不能外推一小时任务的耗时。8 线程大树峰值约 3.48GiB，测试显式使用 4GiB 内存预算。",'',
+        '两个 9 人场景均独立建树、无 ante、最多 4 人入池，保留默认多街设置。普通树每级一个尺寸；大树 3-bet/4-bet 各两个尺寸，允许再加注后的跟注。完整设置和各街节点数可从 JSON 的 scene_settings/manifest 核查。这里不是用户未知具体配置的完整复现，也不是 6000 万次收敛测试。','',
+        '## 已合入的实现','',
+        '1. **固定收益 scalar 分支跳过。** 只在无抽水 ChipEV 下启用。对子树做完整后序分析：目标玩家在任何后继节点都不能行动，不能获得任何底池，且所有叶子的基础筹码收益相同，才直接返回固定值。没有遗漏目标玩家的更新；vector 路径保留，树与策略存储不变。支持非顺序节点 ID 和共享后继，拒绝循环。ICM/MTT/KO/PKO/FGS/抽水不套用这个条件。',
+        '2. **逐玩家按需查桶。** 每副牌、每条街仅首次准备公共牌规范化与表行，只为实际访问的玩家查桶；静态和固定牌面动态抽象都覆盖。',
+        '3. **按参赛者集合缓存胜负。** 同一副牌、相同 eligible mask 只比较一次牌力。缓存随发牌代数失效，并由各线程私有持有；保留平分、边池及余数结算。',
+        '4. **权益缓存命中先返回。** 完整键含全部已用/未用座位与淘汰赢家；只有已验证过的相同键才能跳过重复校验，未命中仍完整校验。',
+        '5. **避免重复最终保存。** 目标恰好落在周期保存点时复用相同检查点。零样本、后续批次、CI/FGS 等边界保留必要保存，增加成功写入次数和耗时诊断。','',
+        '原生运行配置 `constant_scalar_shortcuts` 默认为 true；设为 false 可保留原 scalar 遍历。运行设置不改变游戏身份，可在续跑时改变。跳过冗余抽样会改变 RNG 消耗和固定种子的轨迹；算法标记追加 _constant_scalar，不能宣称开启后与旧程序逐字节一致。二进制检查点和标准 HRC ZIP 成员格式不变。','',
+        '## 验证边界','',
+        '- 262 项不同的相关测试通过，包含 v3/v4、完整续跑、改变线程数、锁定/频率、各街存储、静态/动态抽象、ICM/MTT/KO/PKO、FGS、抽水、取消、内存预算、API 和存档往返。',
+        '- 24 副牌力顺序 × 全部 1,023 个非空座位子集 × 两次读取，共 49,104 次胜负缓存检查，覆盖平分、高位座位、零代和跨副牌失效。非顺序 ID 的固定收益值探针与目标玩家决策保留探针通过。',
+        '- 三个实测场景关闭固定收益跳过时，检查点与旧版计时程序逐字节一致。旧版仅添加保存计时后的程序也通过原始程序检查点一致性核验。PKO 默认自动禁用跳过。',
+        '- 100 万次，seed43/44/45；比较根、BTN open、SB 对 BTN open、BTN 对 SB 3-bet、SB 对 BTN 4-bet。下面逐手组合加权行动 MAE 只描述差异；不等同于 EV 损失、可利用度或已经收敛。','',
+        '| 节点 | 旧版 seed43 与 seed44/45（百分点） | 新旧同 seed44/45（百分点） |',
+        '|---|---:|---:|']
+    for name in report['strategy_comparisons'][0]['baseline_seed43_vs_seed']:
+        noise=[c['baseline_seed43_vs_seed'][name]['combo_weighted_hand_action_mae_pp'] for c in report['strategy_comparisons']]
+        delta=[c['optimized_vs_baseline_same_seed'][name]['combo_weighted_hand_action_mae_pp'] for c in report['strategy_comparisons']]
+        lines.append(f'| {name} | {min(noise):.2f}–{max(noise):.2f} | {min(delta):.2f}–{max(delta):.2f} |')
+    live=report['live_validation']
+    lines+=['',
+        '深节点在 100 万次下仍有较大种子差异，不能由整体频率接近断言准确或声称完全复刻 HRC。固定收益跳过的依据是子树收益恒定且没有目标决策，不是概率低或当前策略为零；本轮没有启用负遗憾剪枝或未修正的行动抽样。','',
+        '## 当前服务','',
+        f"原 8769 服务未重启。新建实际任务 `{live['job_id']}`（9 人 40BB、4 线程、10,000 次）已完成，报告固定收益跳过 {live['summary']['constant_scalar_calls']:,} 次，证明原服务可以直接构建并加载新原生内核。这个小任务用于启动验证，不用于策略质量结论。",'',
+        '自动审批拒绝重启现有服务，返回 blocked by policy，没有给出更具体原因。没有绕过该限制或停止其他进程。新内核默认优化已生效；新增 Python API 开关和 metadata 需服务下次正常重启后才可在该进程使用，其代码已通过 API/存档/续跑测试。','',
+        '## 未采用与后续瓶颈','',
+        '按节点/桶缓存归一化策略的独立实验反而变慢，未合入。大树下一项值得处理的是完整检查点的加载/保存和内存带宽；本轮未实现压缩检查点、增量保存、异步快照或减少保存频率，也未把这些候选收益计入倍率。','',
+        '## 复现','',
+        '基线源码/程序、建树设置和输入保存在 `.research-cache/deep-tree-optimization-20261106/`。`scripts/benchmark-hrc-deep-tree.py --cache <该目录> --output <新目录> --repeats 3` 运行交错计时、精确模式和多种子检查。`scripts/profile-hrc-deep-tree.py` 重现抽样计数诊断；它的外推计时不是性能占比，不用于速度结论。`scripts/report-hrc-deep-tree.py` 核验源文件/程序哈希后发布本报告。','',
+        '完整命令、36 次正式计时、8 次附加核验、逐节点差异、262 项测试标识及现场任务信息见 `reports/hrc-deep-tree-optimization.json`。大树临时检查点及索引在记录哈希与根计数后删除，只删除该基准运行目录内自行生成的文件。','']
+    (ROOT/'research/HRC-DEEP-TREE-OPTIMIZATION.md').write_text('\n'.join(lines),encoding='utf-8')
+    print(json.dumps({'report':str(target),'tests':report['validation']['distinct_tests_passed'],'live_job':live['job_id']}))
+
+
+if __name__=='__main__':main()

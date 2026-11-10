@@ -1,0 +1,11 @@
+{
+  "profile": "product-admin",
+  "sourceRoots": ["web"],
+  "locale": "zh-CN",
+  "canonicalMap": "DESIGN.md",
+  "requiredCapabilities": ["Select/Listbox", "Form", "Scrollbar", "Toast"],
+  "ownership": {"Select/Listbox": "native"},
+  "requiredCommands": [],
+  "commands": {},
+  "evidence": {}
+}

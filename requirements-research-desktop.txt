@@ -1,0 +1,9 @@
+# Optional local HRC desktop observation and independent HU benchmark.
+# Keep separate from the web application's requirements.txt.
+pywinauto==0.6.9
+pywin32==312
+comtypes==1.4.17
+six==1.17.0
+Pillow==13.0.0
+numpy==2.5.4
+scipy==1.18.1

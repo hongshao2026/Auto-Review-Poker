@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WindowsPerformanceRecorder Version="1.0">
+  <Profiles>
+    <SystemCollector Id="SolverCollector" Name="Solver CPU diagnostic">
+      <BufferSize Value="1024"/>
+      <Buffers Value="128"/>
+    </SystemCollector>
+    <SystemProvider Id="SolverKernel">
+      <Keywords>
+        <Keyword Value="ProcessThread"/>
+        <Keyword Value="Loader"/>
+        <Keyword Value="CSwitch"/>
+        <Keyword Value="ReadyThread"/>
+        <Keyword Value="SampledProfile"/>
+      </Keywords>
+      <Stacks>
+        <Stack Value="SampledProfile"/>
+        <Stack Value="CSwitch"/>
+      </Stacks>
+    </SystemProvider>
+    <Profile Id="SolverCPU.Verbose.Memory" Name="SolverCPU" Description="Local short solver CPU and scheduling diagnosis" LoggingMode="Memory" DetailLevel="Verbose">
+      <Collectors>
+        <SystemCollectorId Value="SolverCollector">
+          <SystemProviderId Value="SolverKernel"/>
+        </SystemCollectorId>
+      </Collectors>
+    </Profile>
+  </Profiles>
+</WindowsPerformanceRecorder>
